@@ -152,17 +152,17 @@ class PrivateRecipeApiTests(TestCase):
             self.assertEqual(payload[key], getattr(recipe, key))
         self.assertEqual(recipe.user, self.user)
     
-def test_update_user_returns_error(self):
-    """Test updating recipe of another user returns an error"""
-    user2 = create_user(email='user2@example.com', password='test123')
-    recipe = create_recipe(user=user2)
-    payload = {'user': self.user.id}
-    url = detail_url(recipe.id)
-    res = self.client.patch(url, payload)
+    def test_update_user_returns_error(self):
+        """Test updating recipe of another user returns an error"""
+        user2 = create_user(email='user2@example.com', password='test123')
+        recipe = create_recipe(user=user2)
+        payload = {'user': self.user.id}
+        url = detail_url(recipe.id)
+        res = self.client.patch(url, payload)
 
-    self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-    recipe.refresh_from_db()
-    self.assertEqual(recipe.user, user2)
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+        recipe.refresh_from_db()
+        self.assertEqual(recipe.user, user2)
 
     def test_delete_recipe(self):
         """Test deleting a recipe"""
