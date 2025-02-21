@@ -35,28 +35,30 @@ class RecipeViewSet(viewsets.ModelViewSet):
         """Create a new recipe"""
         serializer.save(user=self.request.user)
 
-class TagViewSet( mixins.DestroyModelMixin, mixins.UpdateModelMixin, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin,viewsets.GenericViewSet,):
-    """Manage tags in the database"""
+class BaseRecipeAttrViewSet(mixins.UpdateModelMixin,
+                            mixins.DestroyModelMixin,
+                            mixins.ListModelMixin,
+                            mixins.CreateModelMixin,
+                            viewsets.GenericViewSet):
+    """Base viewset for user owned recipe attributes"""
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
-    queryset = Tag.objects.all()
-    serializer_class = serializers.TagSerializer
 
     def get_queryset(self):
-        """Return tags for the current authenticated user only"""
-        return self.queryset.filter(user=self.request.user).order_by('-name')
-
-class IngredientViewSet(mixins.DestroyModelMixin,mixins.UpdateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
-    """Manage ingredients in the database"""
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-    queryset = Ingredient.objects.all()
-    serializer_class = serializers.IngredientSerializer
-
-    def get_queryset(self):
-        """Return ingredients for the current authenticated user only"""
+        """Return objects for the current authenticated user only"""
         return self.queryset.filter(user=self.request.user).order_by('-name')
 
     def perform_create(self, serializer):
-        """Create a new ingredient"""
+        """Create a new object"""
         serializer.save(user=self.request.user)
+
+class TagViewSet( BaseRecipeAttrViewSet):
+    """Manage tags in the database"""
+    queryset = Tag.objects.all()
+    serializer_class = serializers.TagSerializer
+
+class IngredientViewSet( BaseRecipeAttrViewSet):
+    """Manage ingredients in the database"""
+    queryset = Ingredient.objects.all()
+    serializer_class = serializers.IngredientSerializer
+
